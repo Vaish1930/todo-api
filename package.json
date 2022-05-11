@@ -1,0 +1,17 @@
+{
+  "name": "to-do-list",
+  "version": "1.0.0",
+  "main": "server.js",
+  "author": "Vaishnavi",
+  "license": "ISC",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "test": "nodemon server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.3",
+    "mongoose": "^6.3.1"
+  }
+}
