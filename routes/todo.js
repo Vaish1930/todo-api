@@ -1,12 +1,13 @@
 import { Router } from "express";
 import Todo from "../models/Todo.js";
+import { verifyToken } from "../utils.js";
 
 const router = Router();
 
-router.get("/todos", async (req, res) => {
+router.get("/todos", verifyToken, async (req, res) => {
   try {
-    const { userId } = req.body;
-    const todos = await Todo.find({ userId }).populate(
+    // const { userId } = req.query;
+    const todos = await Todo.find({ userId: req.user._id }).populate(
       "userId",
       "-password -__v"
     );
@@ -17,10 +18,10 @@ router.get("/todos", async (req, res) => {
   }
 });
 
-router.post("/todos/create", async (req, res) => {
+router.post("/todos/create", verifyToken, async (req, res) => {
   try {
-    const { title, userId } = req.body;
-    const todo = new Todo({ title, userId }); // local memory (same as java object)
+    const { title } = req.body;
+    const todo = new Todo({ title, userId: req.user._id }); // local memory (same as java object)
     const createdTodo = await todo.save(); // database
     res.status(201).json(createdTodo); //  http response to server
   } catch (error) {
@@ -28,10 +29,11 @@ router.post("/todos/create", async (req, res) => {
   }
 });
 
-router.patch("/todos/update/:id", async (req, res) => {
+router.patch("/todos/update/:id", verifyToken, async (req, res) => {
   try {
-    const { title, status, userId } = req.body;
+    const { title, status } = req.body;
     const todo = await Todo.findById(req.params.id);
+    const userId = req.user._id;
     if (userId !== todo.userId.toString())
       // toString is used because in mongoDb id is stored in form of object_id
       return res.status(401).json(`You can't update the todo`);
@@ -45,10 +47,11 @@ router.patch("/todos/update/:id", async (req, res) => {
   }
 });
 
-router.delete("/todos/delete/:id", async (req, res) => {
+router.delete("/todos/delete/:id", verifyToken, async (req, res) => {
   try {
-    const { userId } = req.body;
+    // const { userId } = req.body;
     const todo = await Todo.findById(req.params.id);
+    const userId = req.user._id;
     if (userId !== todo.userId.toString())
       return res
         .status(401)
